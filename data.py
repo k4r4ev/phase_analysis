@@ -1,6 +1,6 @@
 import openpyxl
 
-Datwb = openpyxl.load_workbook(filename = 'Data/BaseData.xlsx')
+Datwb = openpyxl.load_workbook(filename='Data/BaseData.xlsx')
 CalcSheet = Datwb['BaseData']
 
 #ищем нужный стобец
@@ -47,7 +47,7 @@ while CalcSheet.cell(row=ctrrw, column=1).value !=  None:
 #считаем приращение
 CalcSheet.cell(1,2).value = "Приращение"
 iter=2
-while CalcSheet.cell(iter+1,1).value!= None:
+while CalcSheet.cell(iter+1,1).value != None:
    CalcSheet.cell(iter, 2).value = CalcSheet.cell(iter+1, 1).value - CalcSheet.cell(iter, 1).value
    iter += 1
 
