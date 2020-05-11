@@ -1,23 +1,27 @@
 import openpyxl
 import os
 
-from quasicycle import Quasicycle
 from config import Config
 from libs import *
 
 print("Phase analysis program. Sponsored by NATO & NASA")
 
-workbook = openpyxl.load_workbook(Config.sheet)
-sheet = workbook[Config.workbook]
+workbook = openpyxl.load_workbook(Config.workbook)
+if Config.sheet != '':
+    source_sheet = workbook[Config.sheet]
+else:
+    source_sheet = workbook[workbook.sheetnames[0]]
 
+import_source_data(workbook, source_sheet, Config)
+
+sheet = workbook[Config.output_sheet]
 calculate_derivative(sheet, Config)
+quasicycles = get_quasicycles(sheet, Config)
 
-quasicycles = [Quasicycle(sheet, "Квазицикл1", 1, 1, 10), Quasicycle(sheet, "Квазицикл2", 10, 1, 10),
-               Quasicycle(sheet, "Квазицикл3", 20, 1, 10)]
+q_index = 0
+for quasicycle in quasicycles:
+    sheet.add_chart(create_diagram(quasicycle), str(sheet.cell(q_index * 15 + 1, 5).coordinate))
+    q_index += 1
 
-sheet.add_chart(create_diagram(quasicycles[0]), str(sheet.cell(5, 5).coordinate))
-sheet.add_chart(create_diagram(quasicycles[1]), str(sheet.cell(20, 5).coordinate))
-sheet.add_chart(create_diagram(quasicycles[2]), str(sheet.cell(35, 5).coordinate))
-
-os.remove(Config.sheet)
-workbook.save(Config.sheet)
+os.remove(Config.workbook)
+workbook.save(Config.workbook)
