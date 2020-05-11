@@ -1,0 +1,53 @@
+import openpyxl
+from pprint import pprint
+
+Datwb = openpyxl.load_workbook(filename='Data/BaseData2.xlsx')
+CalcSheet = Datwb['BaseData']
+
+PointsList = []
+iter = 2
+while CalcSheet.cell(iter, 3).value is not None:
+    PointsList.append([CalcSheet.cell(iter, 2).value, CalcSheet.cell(iter, 3).value])
+    iter += 1
+
+
+def Distance(point1, point2):
+    # Ищем квадрати разницы Y и X
+    square_x = (point2[0] - point1[0]) ** 2
+    square_y = (point2[1] - point1[1]) ** 2
+    dist = (square_x + square_y) ** 0.5
+    return dist
+
+
+def check_near(points_list, time_check, position, next_num, min_value):
+    while time_check != 0:
+        try:
+            if Distance(points_list[position], points_list[position + next_num + 1]) < min_value:
+                min_value = Distance(points_list[position], points_list[position + next_num + 1])
+                next_num += 1
+            time_check -= 1
+        except IndexError:
+            break
+    return min_value, next_num
+
+
+def Cycle(points_list, ):
+    cycles_pos = []
+    position = 0
+    next_num = 4
+
+    min_value = Distance(points_list[position], points_list[next_num + position])
+
+    while position + next_num < len(points_list) - 1:
+        time_check = 3
+        min_value, next_num = check_near(points_list, time_check, position, next_num, min_value)
+        if next_num == next_num + time_check:
+            while Distance(points_list[position], points_list[position + next_num + 1]) < min_value:
+                min_value = Distance(points_list[position], points_list[position + next_num])
+                next_num += 1
+        cycles_pos.append([position + 1, next_num])
+        position = position + next_num + 1
+        next_num = 4
+    pprint(cycles_pos)
+
+Cycle(PointsList)
