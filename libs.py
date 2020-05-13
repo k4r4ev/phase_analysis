@@ -40,7 +40,12 @@ def create_diagram(quasicycle):
 def calculate_derivative(sheet, config):
     current_row = config.start_row
     while sheet.cell(current_row + 1, config.start_col).value is not None:
-        sheet.cell(current_row, config.start_col + 1).value = sheet.cell(current_row + 1, config.start_col).value
+        sheet.cell(current_row, config.start_col + 1).value = sheet.cell(current_row + 1, config.start_col).value \
+                                                              - sheet.cell(current_row, config.start_col).value
+        current_row += 1
+    current_row = config.start_row
+    while sheet.cell(current_row + 1, config.start_col + 1).value is not None:
+        sheet.cell(current_row, config.start_col + 2).value = sheet.cell(current_row + 1, config.start_col + 1).value
         current_row += 1
 
 
@@ -67,8 +72,8 @@ def get_quasicycles(sheet, config):
     quasicycles = []
     points_list = []
     row = 1
-    while sheet.cell(row, 2).value is not None:
-        points_list.append([sheet.cell(row, 1).value, sheet.cell(row, 2).value])
+    while sheet.cell(row, 3).value is not None:
+        points_list.append([sheet.cell(row, 2).value, sheet.cell(row, 3).value])
         row += 1
     position = 0
     q_index = 1
@@ -81,7 +86,7 @@ def get_quasicycles(sheet, config):
             while distance(points_list[position], points_list[position + q_size + 1]) < min_value:
                 min_value = distance(points_list[position], points_list[position + q_size])
                 q_size += 1
-        quasicycles.append(Quasicycle(sheet, "Квазицикл " + str(q_index), position + 1, 1, q_size))
+        quasicycles.append(Quasicycle(sheet, "Квазицикл " + str(q_index), position + 1, 2, q_size))
         position = position + q_size + 1
         q_index += 1
     return quasicycles

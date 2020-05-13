@@ -5,4 +5,4 @@ class Config:
     output_sheet = 'phase_analysis'
     start_col = 1
     start_row = 1
-    min_size = 6
+    min_size = 4

@@ -16,6 +16,7 @@ import_source_data(workbook, source_sheet, Config)
 
 sheet = workbook[Config.output_sheet]
 calculate_derivative(sheet, Config)
+
 quasicycles = get_quasicycles(sheet, Config)
 
 q_index = 0
