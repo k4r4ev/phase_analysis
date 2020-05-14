@@ -1,4 +1,4 @@
-from openpyxl.chart import Reference, ScatterChart, Series
+from openpyxl.chart import Reference, ScatterChart, LineChart, BarChart, Series
 from quasicycle import Quasicycle
 
 
@@ -10,16 +10,17 @@ def import_source_data(workbook, source_sheet, config):
         col += 1
     workbook.create_sheet(config.output_sheet, len(workbook.sheetnames) + 1)
     output_sheet = workbook[config.output_sheet]
-    i = 1
+    i = config.start_row
     while source_sheet.cell(row=i + 1, column=col).value is not None:
         output_sheet.cell(i, 1).value = float(source_sheet.cell(i + 1, col).value)
         i += 1
 
 
-def create_diagram(quasicycle):
+def create_diagram(quasicycle, height=7, width=10, style=11):
     chart = ScatterChart()
     chart.title = quasicycle.name
-    chart.style = 2
+    chart.height = height
+    chart.width = width
     chart.x_axis.title = ''
     chart.y_axis.title = ''
     chart.legend = None
@@ -33,8 +34,41 @@ def create_diagram(quasicycle):
     chart.y_axis.scaling.max = quasicycle.col_max + 10
     series = Series(cols_reference, rows_reference, title_from_data=True)
     chart.layoutTarget = "inner"
+    chart.style = style
     chart.series.append(series)
     return chart
+
+
+def create_bar_chart(sheet, start_row, size):
+    bar_chart = BarChart()
+    bar_chart.type = "col"
+    bar_chart.style = 10
+    bar_chart.title = "Память квазициклов"
+    bar_chart.y_axis.title = 'Память'
+    bar_chart.x_axis.title = 'Квазициклы'
+    data = Reference(sheet, min_col=2, min_row=start_row - 1, max_row=start_row + size)
+    indexes = Reference(sheet, min_col=1, min_row=start_row, max_row=start_row + size)
+    bar_chart.add_data(data, titles_from_data=True)
+    bar_chart.set_categories(indexes)
+    bar_chart.shape = 4
+    bar_chart.legend = None
+    return bar_chart
+
+
+def create_line_chart(sheet, start_row, size):
+    line_chart = LineChart()
+    line_chart.title = "Date Axis"
+    line_chart.style = 12
+    line_chart.y_axis.title = "Size"
+    line_chart.y_axis.crossAx = 500
+    line_chart.x_axis = DateAxis(crossAx=100)
+    line_chart.x_axis.number_format = 'd-mmm'
+    line_chart.x_axis.majorTimeUnit = "days"
+    line_chart.x_axis.title = "Date"
+    line_chart.add_data(data, titles_from_data=True)
+    dates = Reference(sheet, min_col=1, min_row=2, max_row=7)
+    line_chart.set_categories(dates)
+    return line_chart
 
 
 def calculate_derivative(sheet, config):
@@ -71,7 +105,7 @@ def check_near(points_list, time_check, position, next_num, min_value):
 def get_quasicycles(sheet, config):
     quasicycles = []
     points_list = []
-    row = 1
+    row = config.start_row
     while sheet.cell(row, 3).value is not None:
         points_list.append([sheet.cell(row, 2).value, sheet.cell(row, 3).value])
         row += 1
@@ -86,7 +120,7 @@ def get_quasicycles(sheet, config):
             while distance(points_list[position], points_list[position + q_size + 1]) < min_value:
                 min_value = distance(points_list[position], points_list[position + q_size])
                 q_size += 1
-        quasicycles.append(Quasicycle(sheet, "Квазицикл " + str(q_index), position + 1, 2, q_size))
+        quasicycles.append(Quasicycle(sheet, "Квазицикл " + str(q_index), position + config.start_row, 2, q_size))
         position = position + q_size + 1
         q_index += 1
     return quasicycles
