@@ -28,11 +28,7 @@ def create_diagram(quasicycle, height=7, width=10, style=11):
                                min_row=quasicycle.start_cell_row, max_row=quasicycle.start_cell_row + quasicycle.size)
     cols_reference = Reference(quasicycle.sheet, min_col=quasicycle.start_cell_col + 1,
                                min_row=quasicycle.start_cell_row, max_row=quasicycle.start_cell_row + quasicycle.size)
-    chart.x_axis.scaling.min = quasicycle.row_min - 10
-    chart.y_axis.scaling.min = quasicycle.col_min - 10
-    chart.x_axis.scaling.max = quasicycle.row_max + 10
-    chart.y_axis.scaling.max = quasicycle.col_max + 10
-    series = Series(cols_reference, rows_reference, title_from_data=True)
+    series = Series(cols_reference, rows_reference, title_from_data=False)
     chart.layoutTarget = "inner"
     chart.style = style
     chart.series.append(series)
@@ -57,21 +53,23 @@ def create_bar_chart(sheet, start_row, size):
 
 def create_line_chart(sheet, start_row, size):
     line_chart = LineChart()
-    line_chart.title = "Date Axis"
-    line_chart.style = 12
-    line_chart.y_axis.title = "Size"
-    line_chart.y_axis.crossAx = 500
-    line_chart.x_axis = DateAxis(crossAx=100)
-    line_chart.x_axis.number_format = 'd-mmm'
-    line_chart.x_axis.majorTimeUnit = "days"
-    line_chart.x_axis.title = "Date"
+    line_chart.title = "График движений площадей прямоугольников"
+    line_chart.style = 14
+    line_chart.width = 20
+    line_chart.y_axis.title = "Площади"
+    line_chart.x_axis.title = "Квазициклы"
+    data = Reference(sheet, min_col=2, min_row=start_row, max_row=start_row + size)
+    dates = Reference(sheet, min_col=1, min_row=start_row, max_row=start_row + size)
     line_chart.add_data(data, titles_from_data=True)
-    dates = Reference(sheet, min_col=1, min_row=2, max_row=7)
     line_chart.set_categories(dates)
+    line_chart.legend = None
     return line_chart
 
 
 def calculate_derivative(sheet, config):
+    sheet.cell(1, 1).value = "Временной ряд"
+    sheet.cell(1, 2).value = "Приращение"
+    sheet.cell(1, 3).value = "Сдвиг"
     current_row = config.start_row
     while sheet.cell(current_row + 1, config.start_col).value is not None:
         sheet.cell(current_row, config.start_col + 1).value = sheet.cell(current_row + 1, config.start_col).value \
