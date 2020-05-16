@@ -1,6 +1,8 @@
 from openpyxl.chart import Reference, ScatterChart, LineChart, BarChart, Series
-from matplotlib import pyplot as plt
 from quasicycle import Quasicycle
+import numpy as np
+from sklearn.cluster import MeanShift, KMeans
+import matplotlib.pyplot as plt
 
 
 def import_source_data(workbook, source_sheet, config):
@@ -17,18 +19,6 @@ def import_source_data(workbook, source_sheet, config):
     while source_sheet.cell(row=i + 1, column=col).value is not None:
         output_sheet.cell(i, 1).value = float(source_sheet.cell(i + 1, col).value)
         i += 1
-
-
-def create_squares_graph():
-    fig, ax = plt.subplots()
-    ax.plot([1, 2, 3], [54, 67, 82], c='blue', linewidth=3)
-    ax.plot([3, 4, 5], [82, 64, 78], c='green', linewidth=3)
-    ax.plot([5, 6, 7], [78, 64, 78], c='red', linewidth=3)
-    plt.title('График движений площадей прямоугольников')
-    plt.xlabel('Номер квазицикла')
-    plt.ylabel('Площадь квазицикла')
-    # plt.show()
-    fig.savefig('squares.png')
 
 
 def create_diagram(quasicycle, height=7, width=10, style=11):
@@ -122,3 +112,23 @@ def get_quasicycles(sheet, config):
         position = position + q_size + 1
         q_index += 1
     return quasicycles
+
+
+def create_squares_graph(quasicycles):
+    sort_quasi = []
+    order = 1
+    for quasicycle in quasicycles:
+        sort_quasi.append([order, quasicycle.square])
+        order += 1
+    sort_quasi = np.array(sort_quasi)
+    sort_quasi.reshape(2, order - 1)
+    k_means = KMeans(n_clusters=3)
+    k_means.fit(sort_quasi)
+    y_k_means = k_means.predict(sort_quasi)
+    fig, ax = plt.subplots()
+    ax.scatter(sort_quasi[:, 0], sort_quasi[:, 1], c=y_k_means, s=50, cmap='viridis')
+    plt.title('График движений площадей прямоугольников')
+    plt.xlabel('Номер квазицикла')
+    plt.ylabel('Площадь квазицикла')
+    fig.savefig('squares.png')
+    # plt.show()

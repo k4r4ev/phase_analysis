@@ -61,7 +61,7 @@ for quasicycle in quasicycles:
 sheet.add_chart(create_bar_chart(sheet, start_row, index - 2), str(sheet.cell(40, 17).coordinate))
 
 # движения площадей прямоугольников
-create_squares_graph()
+create_squares_graph(quasicycles)
 img = Image('squares.png')
 sheet.add_image(img, str(sheet.cell(56, 17).coordinate))
 
