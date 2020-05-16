@@ -1,5 +1,6 @@
 import openpyxl
 import os
+from openpyxl.drawing.image import Image
 
 from config import Config
 from libs import *
@@ -60,18 +61,9 @@ for quasicycle in quasicycles:
 sheet.add_chart(create_bar_chart(sheet, start_row, index - 2), str(sheet.cell(40, 17).coordinate))
 
 # движения площадей прямоугольников
-current_row += 5
-index = 1
-sheet.cell(current_row, 1).value = "Номер квазицикла"
-sheet.cell(current_row, 2).value = "Площадь квазицикла"
-current_row += 1
-start_row = current_row
-for quasicycle in quasicycles:
-    sheet.cell(current_row, 1).value = index
-    sheet.cell(current_row, 2).value = quasicycle.square
-    index += 1
-    current_row += 1
-sheet.add_chart(create_line_chart(sheet, start_row, index - 2), str(sheet.cell(56, 17).coordinate))
+create_squares_graph()
+img = Image('squares.png')
+sheet.add_image(img, str(sheet.cell(56, 17).coordinate))
 
 os.remove(Config.workbook)
 workbook.save(Config.workbook)

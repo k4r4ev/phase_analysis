@@ -1,4 +1,5 @@
 from openpyxl.chart import Reference, ScatterChart, LineChart, BarChart, Series
+from matplotlib import pyplot as plt
 from quasicycle import Quasicycle
 
 
@@ -8,12 +9,26 @@ def import_source_data(workbook, source_sheet, config):
         if source_sheet.cell(row=1, column=col).value == config.source_col:
             break
         col += 1
-    workbook.create_sheet(config.output_sheet, len(workbook.sheetnames) + 1)
+    if config.output_sheet in workbook.sheetnames:
+        workbook.remove_sheet(workbook.get_sheet_by_name(config.output_sheet))
+    workbook.create_sheet(config.output_sheet)
     output_sheet = workbook[config.output_sheet]
     i = config.start_row
     while source_sheet.cell(row=i + 1, column=col).value is not None:
         output_sheet.cell(i, 1).value = float(source_sheet.cell(i + 1, col).value)
         i += 1
+
+
+def create_squares_graph():
+    fig, ax = plt.subplots()
+    ax.plot([1, 2, 3], [54, 67, 82], c='blue', linewidth=3)
+    ax.plot([3, 4, 5], [82, 64, 78], c='green', linewidth=3)
+    ax.plot([5, 6, 7], [78, 64, 78], c='red', linewidth=3)
+    plt.title('График движений площадей прямоугольников')
+    plt.xlabel('Номер квазицикла')
+    plt.ylabel('Площадь квазицикла')
+    # plt.show()
+    fig.savefig('squares.png')
 
 
 def create_diagram(quasicycle, height=7, width=10, style=11):
@@ -49,21 +64,6 @@ def create_bar_chart(sheet, start_row, size):
     bar_chart.shape = 4
     bar_chart.legend = None
     return bar_chart
-
-
-def create_line_chart(sheet, start_row, size):
-    line_chart = LineChart()
-    line_chart.title = "График движений площадей прямоугольников"
-    line_chart.style = 14
-    line_chart.width = 20
-    line_chart.y_axis.title = "Площади"
-    line_chart.x_axis.title = "Квазициклы"
-    data = Reference(sheet, min_col=2, min_row=start_row, max_row=start_row + size)
-    dates = Reference(sheet, min_col=1, min_row=start_row, max_row=start_row + size)
-    line_chart.add_data(data, titles_from_data=True)
-    line_chart.set_categories(dates)
-    line_chart.legend = None
-    return line_chart
 
 
 def calculate_derivative(sheet, config):
